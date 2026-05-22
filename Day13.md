@@ -1,4 +1,6 @@
-## 平衡二叉树
+## Day13
+
+### 平衡二叉树
 
 **二叉树节点的深度**：指的是从根节点到该节点的最长简单路径边的条数，就是从根往下到这个节点的距离
 
@@ -61,6 +63,8 @@ class Solution:
 
 **迭代法**
 
+`if root is None:`空树一定是平衡二叉树，核心是这个`if abs(self.getDepth(node.left) - self.getDepth(node.right)) > 1:`计算左右子数的最大高度，如果高度差 > 1那就不是平衡二叉树返回False，而在`getDepth`用到了之前的空指针法，如果遇到的不是None，那就把这个数先弹出来再压回去跟上空指针做标记，然后压入右子树和左子树，同时高度加一比如`root= [3,9,20,null,null,15,7]`传20进去那么这个过程执行完后就是`st = [20, None, 15, 7]`再来一次循环就是`st = [20, None, 7, 15, None]`如果遇到的是空指针那就进行回溯执行完`node = st.pop() st.pop`后就是`st = [20, None, 15]`也就是遇到None把 7 和 None 都弹出去，同时高度 -1 ，此时的高度就是1，每次判断结束后用`max()`来判断res和depth哪个大，大的返回给res，全部循环结束后的res就是最大高度
+
 ```python
 # Definition for a binary tree node.
 # class TreeNode:
@@ -73,19 +77,19 @@ class Solution:
         st = []
         if cur is not None:
             st.append(cur)
-        res = 0
         depth = 0
+        res = 0
         while st:
             node = st[-1]
-            if node is not None:
+            if node:
                 st.pop()
                 st.append(node)
                 st.append(None)
-                depth += 1
                 if node.right:
                     st.append(node.right)
                 if node.left:
                     st.append(node.left)
+                depth += 1
             else:
                 node = st.pop()
                 st.pop()
@@ -94,10 +98,9 @@ class Solution:
         return res
         
     def isBalanced(self, root: Optional[TreeNode]) -> bool:
-        st = []
         if root is None:
             return True
-        st.append(root)
+        st = [root]
         while st:
             node = st.pop()
             if abs(self.getDepth(node.left) - self.getDepth(node.right)) > 1:
@@ -109,4 +112,132 @@ class Solution:
         return True
 ```
 
+**迭代法精简版**
+
+这里和上面迭代法不一样的地方在于`node = stack.pop()`不是`node = stack[-1]`，所以下面else里面不用再把None给弹出去，不为None的时候也不用弹出再压回去，`left, right = height_map.get(node.left, 0), height_map.get(node.right, 0)`是核心，get字典里左右子树的高度，没有返回0，然后`height_map[node] = 1 + max(left, right)`比最大值然后记入该节点的字典里，记得加上本层的1
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def isBalanced(self, root: Optional[TreeNode]) -> bool:
+        if not root:
+            return True
+        stack = [root]
+        height_map = {}
+        while stack:
+            node = stack.pop()
+            if node:
+                stack.append(node)
+                stack.append(None)
+                if node.right:
+                    stack.append(node.right)
+                if node.left:
+                    stack.append(node.left)
+            else:
+                node = stack.pop()
+                left, right = height_map.get(node.left, 0), height_map.get(node.right, 0)
+                if abs(left - right) > 1:
+                    return False
+                height_map[node] = 1 + max(left, right)
+        return True
+```
+
+### 二叉树的所有路径
+
+```
+输入：root = [1,2,3,null,5]
+输出：["1->2->5","1->3"]
+```
+
+`path.append(cur.val)`把当前节点加入到路径中path=[1],`if not cur.left and not cur.right:`当子右子树都没有节点就是叶子节点`"->".join(map(str, path))`map就是对里面所有数字变成字符串,然后通过join拼接成[1, 2, 5]然后添加进res里。还没到叶子节点的时候就`self.traversal(cur.left, path, res)`看哪边还有左右子树走哪边，走完后使用`path.pop()`回溯。比如添加完[1, 2, 5]路径后开始return，然后开始`path.pop()`变成[1, 2]接着判断当前节点右子树，这样依次递归遍历左子树右子树，探索分支路径，核心就是`path.pop()`完美
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def traversal(self, cur, path, res):
+        path.append(cur.val)
+        if not cur.left and not cur.right:
+            res.append("->".join(map(str, path)))
+        if cur.left:
+            self.traversal(cur.left, path, res)
+            path.pop()
+        if cur.right:
+            self.traversal(cur.right, path, res)
+            path.pop()           
+
+    def binaryTreePaths(self, root: Optional[TreeNode]) -> List[str]:
+        res = []
+        path = []
+        if not root:
+            return res
+        self.traversal(root, path, res)
+        return res
+```
+
+### 左叶子之和
+
+参考了上一题二叉树所有路径的递归法，res为每个左叶子节点的值，当左子节点有树而且还满足叶子节点（左右子树都没有的情况下）就`res += cur.left.val`然后递归遍历每个节点，不是左叶子节点的情况下都不进行res的相加，也不进行其他的判断，最后到了`not cur`也就是遍历的路径到了尽头没有节点的时候递归就开始一层一层回溯，回到最初递归的res就是遍历了所有节点后，有左叶子节点的值之和
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def test(self, cur):
+        res = 0
+        if not cur:
+            return 0
+        if cur.left and not cur.left.left and not cur.left.right:
+            res += cur.left.val
+        res += self.test(cur.left)        
+        res += self.test(cur.right)
+        return res        
+    def sumOfLeftLeaves(self, root: Optional[TreeNode]) -> int:
+        if not root:
+            return 0    
+        return self.test(root)
+```
+
+### 找树左下角的值
+
+`self.max_depth`记录当前遍历到的最大深度`self.res`保存最终左下角的结果，注意这个左下角，题目要求：给定一个二叉树的 **根节点** `root`，请找出该二叉树的 **最底层 最左边** 节点的值。这个最底层最左边的数哪怕最底层只有一个树，他还是right的树，他也是要找的那个最底层最左边的值。只在叶子节点来判断最大深度来更新值，其他情况就继续递归遍历
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def findBottomLeftValue(self, root: Optional[TreeNode]) -> int:
+        self.max_depth = float("-inf")
+        self.res = 0
+        self.traversal(root, 0)
+        return self.res
+
+    def traversal(self, cur, depth):
+        if not cur.left and not cur.right:
+            if depth > self.max_depth:
+                self.max_depth = depth
+                self.res = cur.val
+            return
+        if cur.left:
+            self.traversal(cur.left, depth + 1)
+        if cur.right:
+            self.traversal(cur.right, depth + 1)
+```
 
