@@ -211,9 +211,9 @@ class Solution:
         return self.test(root)
 ```
 
-### 找树左下角的值
+### 完全二叉树的节点个数
 
-`self.max_depth`记录当前遍历到的最大深度`self.res`保存最终左下角的结果，注意这个左下角，题目要求：给定一个二叉树的 **根节点** `root`，请找出该二叉树的 **最底层 最左边** 节点的值。这个最底层最左边的数哪怕最底层只有一个树，他还是right的树，他也是要找的那个最底层最左边的值。只在叶子节点来判断最大深度来更新值，其他情况就继续递归遍历
+自己写的：递归法遍历全部节点~每遍历到一个就用全局变量把res+=1算出节点个数
 
 ```python
 # Definition for a binary tree node.
@@ -223,21 +223,57 @@ class Solution:
 #         self.left = left
 #         self.right = right
 class Solution:
-    def findBottomLeftValue(self, root: Optional[TreeNode]) -> int:
-        self.max_depth = float("-inf")
-        self.res = 0
-        self.traversal(root, 0)
-        return self.res
-
-    def traversal(self, cur, depth):
-        if not cur.left and not cur.right:
-            if depth > self.max_depth:
-                self.max_depth = depth
-                self.res = cur.val
-            return
+    def getDepth(self, cur):
+        if not cur:
+            return 
+        self.res += 1
         if cur.left:
-            self.traversal(cur.left, depth + 1)
+            self.getDepth(cur.left)
         if cur.right:
-            self.traversal(cur.right, depth + 1)
+            self.getDepth(cur.right)
+
+    def countNodes(self, root: Optional[TreeNode]) -> int:
+        if not root:
+            return 0
+        self.res = 0
+        self.getDepth(root)
+        return self.res
+```
+
+**递归法**
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def getDepth(self, cur):
+        if not cur:
+            return 0
+        leftNum = self.getDepth(cur.left)
+        rightNum = self.getDepth(cur.right)
+        return leftNum + rightNum + 1
+
+    def countNodes(self, root: Optional[TreeNode]) -> int:
+        return self.getDepth(root)
+```
+
+**递归精简**
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def countNodes(self, root: Optional[TreeNode]) -> int:
+        if not root:
+            return 0
+        return self.countNodes(root.left) + self.countNodes(root.right) + 1
 ```
 
