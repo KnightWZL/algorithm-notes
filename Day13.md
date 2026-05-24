@@ -277,3 +277,29 @@ class Solution:
         return self.countNodes(root.left) + self.countNodes(root.right) + 1
 ```
 
+**迭代法**
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def countNodes(self, root: Optional[TreeNode]) -> int:
+        queue = collections.deque()
+        if root:
+            queue.append(root)
+        res = 0
+        while queue:
+            for i in range(len(queue)):
+                node = queue.popleft()
+                res += 1
+                if node.left:
+                    queue.append(node.left)
+                if node.right:
+                    queue.append(node.right)
+        return res
+```
+
