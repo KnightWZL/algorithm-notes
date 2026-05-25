@@ -146,3 +146,161 @@ class Solution:
 ```
 
 ### 路径总和II
+
+在路径总和的解法思路上加了个path列表来管理路径，path + [node.left.val]和append差不多，但是append是在原列表上添加数据，而+的话相当于新生成一个列表返回来，这样每个分支都自带独立路径互不干扰
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def pathSum(self, root: Optional[TreeNode], targetSum: int) -> List[List[int]]:
+        if not root:
+            return []
+        st = [(root, root.val, [root.val])]
+        resList = []
+        while st:
+            node, Sumval, path = st.pop()
+            if not node.right and not node.left and Sumval == targetSum:
+                resList.append(path)
+            if node.left:
+                st.append((node.left, Sumval + node.left.val, path + [node.left.val]))
+            if node.right:
+                st.append((node.right, Sumval + node.right.val, path + [node.right.val]))
+        return resList
+```
+
+**迭代法**
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def pathSum(self, root: Optional[TreeNode], targetSum: int) -> List[List[int]]:
+        if not root:
+            return []
+        st = [(root, [root.val])]
+        pathList = []
+        while st:
+            node, path = st.pop()
+            if not node.left and not node.right and sum(path) == targetSum:
+                pathList.append(path)
+            if node.left:
+                st.append((node.left, path + [node.left.val]))
+            if node.right:
+                st.append((node.right, path + [node.right.val]))
+        return pathList
+```
+
+**递归法**
+
+最精妙的我觉得是`path[:]`拷贝一份独立处理，不会影响原列表，每次递归都是新拷贝的一份，相当于每个分支都自带独立路径，互不干扰
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def __init__(self):
+        self.path = []
+        self.res = []
+
+    def traversal(self, cur, count):
+        if not cur.left and not cur.right and count == 0:
+            self.res.append(self.path[:])
+            return
+        if not cur.left and not cur.right:
+            return
+        if cur.left:
+            self.path.append(cur.left.val)
+            count -= cur.left.val
+            self.traversal(cur.left, count)
+            count += cur.left.val
+            self.path.pop()
+        if cur.right:
+            self.path.append(cur.right.val)
+            count -= cur.right.val
+            self.traversal(cur.right, count)
+            count += cur.right.val
+            self.path.pop()
+    def pathSum(self, root: Optional[TreeNode], targetSum: int) -> List[List[int]]:
+        if not root:
+            return []
+        self.path.append(root.val)
+        self.traversal(root, targetSum - root.val)
+        return self.res
+```
+
+**递归精简**
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def traversal(self, cur, count, path, res):
+        if not cur:
+            return
+        path.append(cur.val)
+        count -= cur.val
+        if not cur.left and not cur.right and count == 0:
+            res.append(list(path))
+        self.traversal(cur.left, count, path, res)
+        self.traversal(cur.right, count, path, res)
+        path.pop()
+
+    def pathSum(self, root: Optional[TreeNode], targetSum: int) -> List[List[int]]:
+        res = []
+        self.traversal(root, targetSum, [], res)
+        return res
+```
+
+### 从中序与后序遍历序列构造二叉树
+
+- 中序遍历 inorder = [9,3,15,20,7]
+- 后序遍历 postorder = [9,15,7,20,3]
+
+中间节点也就是后序遍历里的最后一个节点：3 `root_val = postorder[-1]`得到中间节点后在中序遍历里找切割点，`inorder[:curindex]`也就是[9]，而`inorder[curindex + 1:]`也就是[15,20,7]之后再切割postorder数组得到左右边，中序列表大小一定是和后序列表大小相等的，后序遍历里最后一个数据就是中间节点已经取出来了~所以取到这就可以`len(postorder) - 1`，之后开始递归~`TreeNode(root_val)`之前后序遍历里的最后一个节点构造为第一个节点root，root左节点指向递归的左left_inorder和left_postorder，右节点同理~最后返回root这个头节点，完美
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def buildTree(self, inorder: List[int], postorder: List[int]) -> Optional[TreeNode]:
+        if not postorder:
+            return None
+        
+        root_val = postorder[-1]
+        root = TreeNode(root_val)
+        
+        curindex = inorder.index(root_val)
+
+        left_inorder = inorder[:curindex]
+        right_inorder = inorder[curindex + 1:]
+
+        left_postorder = postorder[:len(left_inorder)]
+        right_postorder = postorder[len(left_inorder):len(postorder) - 1]
+
+        root.left = self.buildTree(left_inorder, left_postorder)
+        root.right = self.buildTree(right_inorder, right_postorder)
+
+        return root
+```
+
