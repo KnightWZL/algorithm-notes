@@ -146,6 +146,8 @@ class Solution:
 
 ### 验证二叉搜索树
 
+**递归 判断是不是正序数组**
+
 二叉搜索树左子树的值是比中间的值小的，所以先`self.traversal(root.left)`递归把左边的值放进列表，然后再放中间节点的值，最后递归放右子树的将整个树的值存入列表，之后遍历列表看看里面的值是否是正序，一旦出现前面大于后面的情况返回Flase，注意也不能等于，因为二叉搜索树里不能有相同元素的值，所以判断语句是`if self.vec[i - 1] >= self.vec[i]:`
 
 ```python
@@ -170,6 +172,59 @@ class Solution:
         for i in range(1, len(self.vec)):
             if self.vec[i - 1] >= self.vec[i]:
                 return False
+        return True
+```
+
+**递归**
+
+`self.maxval = float('-inf')`定义一个极小值，因为后台测试数据里有int最小值，之后依旧是验证遍历的元素是不是从小到大
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def __init__(self):
+        self.maxval = float('-inf')
+    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+        if not root:
+            return True
+        left = self.isValidBST(root.left)
+        if root.val > self.maxval:
+            self.maxval = root.val
+        else:
+            return False
+        right = self.isValidBST(root.right)
+        return left and right
+```
+
+**迭代法**
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+        stack = []
+        pre = None
+        cur = root
+        while cur or len(stack) > 0:
+            if cur:
+                stack.append(cur)
+                cur = cur.left
+            else:
+                cur = stack.pop()
+                if pre and pre.val >= cur.val:
+                    return False
+                pre = cur
+                cur = cur.right
         return True
 ```
 
