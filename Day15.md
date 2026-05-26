@@ -203,6 +203,8 @@ class Solution:
 
 **迭代法**
 
+用`pre = None`来存储上一个节点，当前节点cur有值，入栈，然后到左节点，当前节点没值的时候，出栈，然后pre上个节点有值的时候判断上个节点和这个节点大小，上个节点大于等于返回Flase，之后将当前节点赋值给上个节点，然后将右子节点赋值给当前节点，继续迭代遍历，全部遍历结束返回True
+
 ```python
 # Definition for a binary tree node.
 # class TreeNode:
