@@ -90,3 +90,54 @@ class Solution:
             curSum -= i
 ```
 
+### 电话号码的字母组合
+
+**回溯**
+
+回溯条件`if index == len(digits):`当index=数字输入的位数时，将s添加进res列表里然后return，`digit = int(digits[index])`来获取当前位置的数字，用获取到的数字`letter = self.digitList[digit]`来获取对应数字下的字母，开始递归回溯，`for i in range(len(letter)):`遍历每一个字母，`self.backtracking(digits, index + 1)`开始处理下一个数字，`self.s = self.s[:-1]`删除字符串最后一位也是最关键的一步，回溯
+
+```python
+class Solution:
+    def __init__(self):
+        self.digitList = ["", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"]
+        self.s = ""
+        self.res = []
+    def backtracking(self, digits, index):
+        if index == len(digits):
+            self.res.append(self.s)
+            return
+        digit = int(digits[index])
+        letter = self.digitList[digit]
+        for i in range(len(letter)):
+            self.s += letter[i]
+            self.backtracking(digits, index + 1)
+            self.s = self.s[:-1] 
+    def letterCombinations(self, digits: str) -> List[str]:
+        if len(digits) == 0:
+            return self.res
+        self.backtracking(digits, 0)
+        return self.res         
+```
+
+**回溯**精简
+
+```python
+class Solution:
+    def __init__(self):
+        self.digitList = ["", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"]
+    def backtracking(self, digits, index, s, res):
+        if index == len(digits):
+            res.append(s)
+            return
+        digit = int(digits[index])
+        letters = self.digitList[digit]
+        for letter in letters:
+            self.backtracking(digits, index + 1, s + letter, res)
+    def letterCombinations(self, digits: str) -> List[str]:
+        res = []
+        if len(digits) == 0:
+            return res
+        self.backtracking(digits, 0, "", res)
+        return res         
+```
+
