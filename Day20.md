@@ -81,3 +81,35 @@ class Solution:
         return res
 ```
 
+### 分割回文串
+
+```python
+class Solution:
+    def partition(self, s: str) -> List[List[str]]:
+        result = []
+        self.backtracking(s, 0, [], result)
+        return result
+    def backtracking(self, s, start_index, path, result ):
+        # Base Case
+        if start_index == len(s):
+            result.append(path[:])
+            return   
+        # 单层递归逻辑
+        for i in range(start_index, len(s)):
+            # 此次比其他组合题目多了一步判断：
+            # 判断被截取的这一段子串([start_index, i])是否为回文串
+            if self.is_palindrome(s, start_index, i):
+                path.append(s[start_index:i+1])
+                self.backtracking(s, i+1, path, result)   # 递归纵向遍历：从下一处进行切割，判断其余是否仍为回文串
+                path.pop()             # 回溯
+    def is_palindrome(self, s: str, start: int, end: int) -> bool:
+        i: int = start        
+        j: int = end
+        while i < j:
+            if s[i] != s[j]:
+                return False
+            i += 1
+            j -= 1
+        return True 
+```
+
