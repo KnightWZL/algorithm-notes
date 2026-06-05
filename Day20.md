@@ -81,7 +81,7 @@ class Solution:
         return res
 ```
 
-### 分割回文串
+### [分割回文串](https://leetcode.cn/problems/palindrome-partitioning/)
 
 回文串，切割后的每一子串都是回文,path里的[aa,b]都是回文的情况才能添加进res里。回溯退出条件：`if startIndex == len(s):`当startIndex=s的长度时，添加进res里再返回，注意添加的时候用path[:]来拷贝一个新的列表。`is_palindrome`判断是否为回文的函数，如果`self.is_palindrome(s, startIndex, i)`这一段是回文的话，开始切割进path里，`s[startIndex:i + 1]`注意列表切割是左闭右开的，这里s[0:2]切出来的是[“aa”]然后开始递归，startIndex从i+1开始，跳过本次，最后path回溯
 
