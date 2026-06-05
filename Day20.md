@@ -83,33 +83,54 @@ class Solution:
 
 ### 分割回文串
 
+回文串，切割后的每一子串都是回文,path里的[aa,b]都是回文的情况才能添加进res里。回溯退出条件：`if startIndex == len(s):`当startIndex=s的长度时，添加进res里再返回，注意添加的时候用path[:]来拷贝一个新的列表。`is_palindrome`判断是否为回文的函数，如果`self.is_palindrome(s, startIndex, i)`这一段是回文的话，开始切割进path里，`s[startIndex:i + 1]`注意列表切割是左闭右开的，这里s[0:2]切出来的是[“aa”]然后开始递归，startIndex从i+1开始，跳过本次，最后path回溯
+
 ```python
 class Solution:
     def partition(self, s: str) -> List[List[str]]:
-        result = []
-        self.backtracking(s, 0, [], result)
-        return result
-    def backtracking(self, s, start_index, path, result ):
-        # Base Case
-        if start_index == len(s):
-            result.append(path[:])
-            return   
-        # 单层递归逻辑
-        for i in range(start_index, len(s)):
-            # 此次比其他组合题目多了一步判断：
-            # 判断被截取的这一段子串([start_index, i])是否为回文串
-            if self.is_palindrome(s, start_index, i):
-                path.append(s[start_index:i+1])
-                self.backtracking(s, i+1, path, result)   # 递归纵向遍历：从下一处进行切割，判断其余是否仍为回文串
-                path.pop()             # 回溯
-    def is_palindrome(self, s: str, start: int, end: int) -> bool:
-        i: int = start        
-        j: int = end
-        while i < j:
-            if s[i] != s[j]:
+        res = []
+        path = []
+        self.backtracking(s, 0, path, res)
+        return res
+    def backtracking(self, s, startIndex, path, res):
+        if startIndex == len(s):
+           res.append(path[:])
+           return
+        for i in range(startIndex, len(s)):
+            if self.is_palindrome(s, startIndex, i):
+                path.append(s[startIndex:i + 1])
+                self.backtracking(s, i + 1, path, res)
+                path.pop()
+    def is_palindrome(self, s, start, end):
+        l = start
+        r = end
+        while l < r:
+            if s[l] != s[r]:
                 return False
-            i += 1
-            j -= 1
-        return True 
+            l += 1
+            r -= 1
+        return True
+```
+
+**使用[::-1]**
+
+虽然方便，但是性能比上面的写法差好多~
+
+```python
+class Solution:
+    def partition(self, s: str) -> List[List[str]]:
+        res = []
+        path = []
+        self.backtracking(s, 0, path, res)
+        return res
+    def backtracking(self, s, startIndex, path, res):
+        if startIndex == len(s):
+           res.append(path[:])
+           return
+        for i in range(startIndex, len(s)):
+            if s[startIndex:i + 1] == s[startIndex:i + 1][::-1]:
+                path.append(s[startIndex:i + 1])
+                self.backtracking(s, i + 1, path, res)
+                path.pop()
 ```
 
