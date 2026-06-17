@@ -18,3 +18,32 @@ class Solution:
         return _sum - dp[target] - dp[target]
 ```
 
+### [目标和](https://leetcode.cn/problems/target-sum/)
+
+```python
+class Solution:
+    def findTargetSumWays(self, nums: List[int], target: int) -> int:
+        total_sum = sum(nums)  
+        if abs(target) > total_sum:
+            return 0  
+        if (target + total_sum) % 2 == 1:
+            return 0  
+        target_sum = (target + total_sum)
+        dp = [[0] * (target_sum + 1) for _ in range(len(nums))]
+        dp[0][0] = 1
+        if nums[0] <= target_sum:
+            dp[0][nums[0]] = 1
+        numZero = 0
+        for i in range(len(nums)):
+            if nums[i] == 0:
+                numZero += 1
+            dp[i][0] = int(math.pow(2, numZero))
+        for i in range(1, len(nums)):
+            for j in range(target_sum + 1):
+                dp[i][j] = dp[i - 1][j]
+                if j >= nums[i - 1]:
+                    dp[i][j] += dp[i - 1][j - nums[i]]
+
+        return dp[len(nums)-1][target_sum]
+```
+
