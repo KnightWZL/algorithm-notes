@@ -122,3 +122,18 @@ class Solution:
         return dp[target_sum]
 ```
 
+### [一和零](https://leetcode.cn/problems/ones-and-zeroes/)
+
+```python
+class Solution:
+    def findMaxForm(self, strs: List[str], m: int, n: int) -> int:
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for s in strs:
+            zoreNum = s.count("0")
+            oneNum = len(s) - zoreNum
+            for i in range(m, zoreNum - 1, -1):
+                for j in range(n, oneNum - 1, -1):
+                    dp[i][j] = max(dp[i][j], dp[i - zoreNum][j - oneNum] + 1)
+        return dp[m][n]
+```
+
